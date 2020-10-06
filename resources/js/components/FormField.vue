@@ -12,6 +12,7 @@
                 :custom-label="customLabel"
                 :open-direction="this.field.openDirection ? this.field.openDirection : ''"
                 @input="onChange"
+                @remove="removeOption"
             >
                 <span
                     slot="noResult"
@@ -83,7 +84,8 @@ export default {
                             resourceClass: this.field.resourceParentClass,
                             modelClass: dependsOnValue.field.modelClass,
                             attribute: this.field.attribute,
-                            dependKey: dependsOnValue.value[dependsOnValue.field.modelPrimaryKey]
+                            dependKey: dependsOnValue.value[dependsOnValue.field.modelPrimaryKey],
+                            dependNull: this.field.dependsOnNull,
                         })
                     ).data;
 
@@ -94,6 +96,17 @@ export default {
                             field: this.field
                         });
                     }
+                }else if(this.field.dependsOnNull){
+                    this.options = (
+                        await Nova.request().post("/nova-vendor/nova-belongsto-depend", {
+                            resourceClass: this.field.resourceParentClass,
+                            modelClass: dependsOnValue.field.modelClass,
+                            attribute: this.field.attribute,
+                            dependKey: null,
+                            dependNull: this.field.dependsOnNull,
+                        })
+                    ).data;
+
                 }
             });
         }
@@ -112,16 +125,15 @@ export default {
 
             if (this.field.value) {
                 this.value = this.options.find(item => item[this.field.modelPrimaryKey] == this.field.valueKey);
-            } else if (this.creatingViaRelatedResource) {
+            }else if (this.creatingViaRelatedResource) {
                 this.value = this.options.find(item => item[this.field.modelPrimaryKey] == this.viaResourceId);
             }
 
-            if (this.value) {
-                Nova.$emit("nova-belongsto-depend-" + this.field.attribute.toLowerCase(), {
-                    value: this.value,
-                    field: this.field
-                });
-            }
+            Nova.$emit("nova-belongsto-depend-" + this.field.attribute.toLowerCase(), {
+                value: this.value,
+                field: this.field
+            });
+
         },
 
         /**
@@ -144,6 +156,11 @@ export default {
          */
         handleChange(value) {
             this.value = value;
+        },
+
+        removeOption(value){
+            if(this.field.dependsOnNull)
+                this.onChange(value)
         },
 
         async onChange(value) {

@@ -26,6 +26,7 @@ class NovaBelongsToDepend extends BelongsTo
 
     public $dependKey;
     public $dependsOn;
+    public $dependsOnNull = false;
 
     public $optionResolveCallback = null;
     public $options = [];
@@ -82,6 +83,12 @@ class NovaBelongsToDepend extends BelongsTo
     public function dependsOn($relationship)
     {
         $this->dependsOn = Str::lower($relationship);
+        return $this;
+    }
+
+    public function dependsOnNull()
+    {
+        $this->dependsOnNull = true;
         return $this;
     }
 
@@ -205,6 +212,7 @@ class NovaBelongsToDepend extends BelongsTo
             'valueKey' => $this->valueKey,
             'dependKey' => $this->dependKey,
             'dependsOn' => $this->dependsOn,
+            'dependsOnNull' => $this->dependsOnNull,
             'titleKey' => $this->titleKey,
             'resourceParentClass' => $this->resourceParentClass,
             'modelClass' => $this->modelClass,

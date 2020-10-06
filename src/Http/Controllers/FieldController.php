@@ -12,7 +12,7 @@ class FieldController extends Controller
 {
     public function index(NovaRequest $request)
     {
-        if (is_null($request->dependKey)) {
+        if (is_null($request->dependKey) && !$request->dependNull) {
             abort(500, 'Depend On Relationship not found on the Resource specified for the Field "' . $request->attribute . '" Please check you have set correct /App/Nova/Resource');
         }
 
@@ -39,7 +39,7 @@ class FieldController extends Controller
 
         $model = $request->modelClass::find($request->dependKey);
 
-        if (is_null($model)) {
+        if (is_null($model) && !$request->dependNull) {
             abort(500, 'Can not find the Model "' . $request->modelClass . '::find(' . $request->dependKey . ')');
         }
 
@@ -47,7 +47,7 @@ class FieldController extends Controller
 
         return $result;
     }
-    
+
     public function returnFields($fields) {
         return collect($fields)->map(function ($field) {
             if (isset($field->data)) {
@@ -57,7 +57,7 @@ class FieldController extends Controller
             } elseif (isset($field->fields)) {
                 return $this->returnFields($field->fields);
             }
-            
+
             return $field;
         })->flatten();
     }
